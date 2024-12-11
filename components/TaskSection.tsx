@@ -1,133 +1,47 @@
 import React from "react";
-import { View, Text, Image, ScrollView } from "react-native";
-import { TaskItemProps } from "../types/type";
-
-const TaskItem: React.FC<TaskItemProps> = ({
-  title,
-  icon,
-  status,
-  priority,
-  progress,
-  assignees,
-  dueDate,
-  commentCount,
-}) => {
+import { View, Text, ScrollView } from "react-native";
+interface DayAttendanceProps {
+  day: string;
+  date: string;
+  status: "present" | "absent" | "late";
+}
+const DayAttendance: React.FC<DayAttendanceProps> = ({ day, date, status }) => {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "present":
+        return "bg-green-500";
+      case "absent":
+        return "bg-red-500";
+      case "late":
+        return "bg-yellow-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
   return (
-    <View className="flex flex-col justify-center p-3 mt-3 w-full bg-gray-50 rounded-xl border border-gray-200">
-      <View className="flex flex-col w-full">
-        <View className="flex flex-row items-center w-full text-sm font-medium tracking-tight text-zinc-800">
-          <Image
-            source={{ uri: icon }}
-            alt="Task Icon"
-            className="object-contain w-6 aspect-square"
-          />
-          <Text className="ml-2">{title}</Text>
-        </View>
-
-        <View className="flex flex-row mt-3 space-x-2">
-          <View className="flex flex-row items-center px-2 py-1 bg-gray-200 rounded-full text-slate-600">
-            <Image
-              source={{
-                uri: "https://cdn.builder.io/api/v1/image/assets/95a3c52e460440f58cf6776b478813ea/4d565cf50b910fa7fa199de57893b5adf23a5a1a892d9e7c905a1c6ee23da900?apiKey=95a3c52e460440f58cf6776b478813ea&",
-              }}
-              alt="Status Icon"
-              className="object-contain w-2.5 h-2.5"
-            />
-            <Text className="ml-1">{status}</Text>
-          </View>
-          <View className="flex flex-row items-center px-2 py-1 bg-rose-500 text-white rounded-full">
-            <Image
-              source={{
-                uri: "https://cdn.builder.io/api/v1/image/assets/95a3c52e460440f58cf6776b478813ea/bb4d608bca285626b81badc13682bcc84e36a142c0f7de70698a1c28c0c5eb86?apiKey=95a3c52e460440f58cf6776b478813ea&",
-              }}
-              alt="Priority Icon"
-              className="object-contain w-2.5 h-2.5"
-            />
-            <Text className="ml-1">{priority}</Text>
-          </View>
-        </View>
-
-        <View className="flex flex-col mt-3 w-full rounded-full">
-          <View className="w-full h-1 bg-neutral-200 rounded-full">
-            <View
-              className="h-1 bg-violet-500 rounded-full"
-              style={{ width: `${progress}%` }}
-            />
-          </View>
-        </View>
-
-        <View className="flex flex-row justify-between items-center mt-3">
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            className="flex-row space-x-2"
-          >
-            {assignees.map((assignee, idx) => (
-              <Image
-                key={idx}
-                source={{ uri: assignee }}
-                alt={`Assignee ${idx + 1}`}
-                className="object-contain w-8 h-8 rounded-full"
-              />
-            ))}
-          </ScrollView>
-          <View className="flex flex-row space-x-3">
-            <View className="flex flex-row items-center px-2 py-1 bg-white rounded-full">
-              <Image
-                source={{
-                  uri: "https://cdn.builder.io/api/v1/image/assets/95a3c52e460440f58cf6776b478813ea/1bf9f8deb8bd5c43ce3e1c9b31a3c2b533ffeecd706bbd87b6762988e883c899?apiKey=95a3c52e460440f58cf6776b478813ea&",
-                }}
-                alt="Due Date Icon"
-                className="w-4 h-4"
-              />
-              <Text className="ml-1">{dueDate}</Text>
-            </View>
-            <View className="flex flex-row items-center px-2 py-1 bg-white rounded-full">
-              <Image
-                source={{
-                  uri: "https://cdn.builder.io/api/v1/image/assets/95a3c52e460440f58cf6776b478813ea/727df9f7f968f2414d6e0d8f4c41c170121bef9a629824d684ec7b5cabb86b03?apiKey=95a3c52e460440f58cf6776b478813ea&",
-                }}
-                alt="Comments Icon"
-                className="w-4 h-4"
-              />
-              <Text className="ml-1">{commentCount}</Text>
-            </View>
-          </View>
-        </View>
+    <View className="flex flex-col items-center mr-4">
+      <Text className="text-sm font-medium text-gray-600">{day}</Text>
+      <View
+        className={`w-10 h-10 rounded-full ${getStatusColor(
+          status
+        )} flex items-center justify-center mt-2`}
+      >
+        <Text className="text-white font-bold">{date}</Text>
       </View>
+      <Text className="text-xs mt-1 capitalize">{status}</Text>
     </View>
   );
 };
-
-export const TaskSection: React.FC = () => {
-  const tasks: TaskItemProps[] = [
-    {
-      title: "Wiring Dashboard Analytics",
-      icon: "https://cdn.builder.io/api/v1/image/assets/95a3c52e460440f58cf6776b478813ea/02bfafd64a13db0b635d6a5f37c7422d938fe29a3b493ccd598c08433466c8ce?apiKey=95a3c52e460440f58cf6776b478813ea&",
-      status: "In Progress",
-      priority: "High",
-      progress: 60,
-      assignees: [
-        "https://cdn.builder.io/api/v1/image/assets/95a3c52e460440f58cf6776b478813ea/e5d0b0a64ae8df74ea5c9262c1f7551b2dd1c0b0c0c101edffd636e03dc45406?apiKey=95a3c52e460440f58cf6776b478813ea&",
-      ],
-      dueDate: "27 April",
-      commentCount: 2,
-    },
-    {
-      title: "Code Review Task",
-      icon: "https://cdn.builder.io/api/v1/image/assets/95a3c52e460440f58cf6776b478813ea/02bfafd64a13db0b635d6a5f37c7422d938fe29a3b493ccd598c08433466c8ce?apiKey=95a3c52e460440f58cf6776b478813ea&",
-      status: "Pending",
-      priority: "Medium",
-      progress: 30,
-      assignees: [
-        "https://cdn.builder.io/api/v1/image/assets/95a3c52e460440f58cf6776b478813ea/e5d0b0a64ae8df74ea5c9262c1f7551b2dd1c0b0c0c101edffd636e03dc45406?apiKey=95a3c52e460440f58cf6776b478813ea&",
-        "https://cdn.builder.io/api/v1/image/assets/95a3c52e460440f58cf6776b478813ea/4d565cf50b910fa7fa199de57893b5adf23a5a1a892d9e7c905a1c6ee23da900?apiKey=95a3c52e460440f58cf6776b478813ea&",
-      ],
-      dueDate: "30 April",
-      commentCount: 5,
-    },
+export const AttendanceHistory: React.FC = () => {
+  const attendanceData: DayAttendanceProps[] = [
+    { day: "Mon", date: "24", status: "present" },
+    { day: "Tue", date: "25", status: "present" },
+    { day: "Wed", date: "26", status: "late" },
+    { day: "Thu", date: "27", status: "present" },
+    { day: "Fri", date: "28", status: "absent" },
+    { day: "Sat", date: "29", status: "present" },
+    { day: "Sun", date: "30", status: "present" },
   ];
-
   return (
     <View className="flex flex-col px-4 py-3 mt-5 w-full bg-white rounded-lg max-w-[366px]">
       <View className="flex flex-row items-center justify-between mb-3">
@@ -135,26 +49,38 @@ export const TaskSection: React.FC = () => {
           className="text-2xl font-semibold text-gray-900"
           style={{ fontFamily: "Poppins-Bold" }}
         >
-          Today's Tasks
+          Attendance History
         </Text>
-        <View className="flex items-center justify-center w-8 h-8 bg-violet-200 rounded-full">
-          <Text
-            style={{ fontFamily: "Poppins-SemiBold" }}
-            className="text-base text-violet-600"
-          >
-            {tasks.length}
-          </Text>
-        </View>
       </View>
       <Text
         className="text-base text-gray-500 mb-3"
         style={{ fontFamily: "Poppins-Regular" }}
       >
-        The tasks assigned to you for today
+        Your attendance for the last 7 days
       </Text>
-      {tasks.map((task, index) => (
-        <TaskItem key={index} {...task} />
-      ))}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        className="flex-row"
+      >
+        {attendanceData.map((day, index) => (
+          <DayAttendance key={index} {...day} />
+        ))}
+      </ScrollView>
+      <View className="flex-row justify-between mt-4">
+        <View className="flex-row items-center">
+          <View className="w-3 h-3 rounded-full bg-green-500 mr-2" />
+          <Text className="text-sm text-gray-600">Present</Text>
+        </View>
+        <View className="flex-row items-center">
+          <View className="w-3 h-3 rounded-full bg-red-500 mr-2" />
+          <Text className="text-sm text-gray-600">Absent</Text>
+        </View>
+        <View className="flex-row items-center">
+          <View className="w-3 h-3 rounded-full bg-yellow-500 mr-2" />
+          <Text className="text-sm text-gray-600">Late</Text>
+        </View>
+      </View>
     </View>
   );
 };
