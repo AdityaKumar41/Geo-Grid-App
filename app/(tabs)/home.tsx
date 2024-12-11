@@ -23,12 +23,12 @@ const defaultLocation = {
 };
 
 const Home: React.FC = () => {
-  const { location, loading, error, refreshLocation } = useLocation();
+  const { location, loading, error, initializeLocation } = useLocation();
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-    refreshLocation().finally(() => {
+    initializeLocation().finally(() => {
       setRefreshing(false);
     });
   }, []);
@@ -46,7 +46,7 @@ const Home: React.FC = () => {
     return (
       <View className="flex-1 bg-slate-100 mt-2">
         <ScrollView className="max-w-[480px] mx-auto w-full">
-          {location && !error && (
+          {location && (
             <View
               className="h-[300px] rounded-md overflow-hidden m-4"
               style={{ elevation: 5 }}
@@ -54,32 +54,28 @@ const Home: React.FC = () => {
               <MapView
                 style={{ width: "100%", height: "100%" }}
                 initialRegion={{
-                  latitude: location?.latitude || defaultLocation.latitude,
-                  longitude: location.longitude || defaultLocation.longitude,
+                  latitude: location.latitude,
+                  longitude: location.longitude,
                   latitudeDelta: 0.01,
                   longitudeDelta: 0.01,
                 }}
                 showsUserLocation={true}
                 followsUserLocation={true}
               >
-                {location && (
-                  <Marker
-                    centerOffset={{ x: 0, y: -20 }}
-                    coordinate={{
-                      latitude: location.latitude || 0,
-                      longitude: location.longitude || 0,
-                    }}
-                    title="Your Location"
-                    description="You are here"
-                    pinColor="#0284c7"
-                  />
-                )}
+                <Marker
+                  coordinate={{
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                  }}
+                  title="Your Location"
+                  description="You are here"
+                  pinColor="#0284c7"
+                />
               </MapView>
             </View>
           )}
           <DateSelector />
           <AttendanceSection />
-
           <View className="space-y-4 p-4">
             <AttendanceHistory />
           </View>
@@ -89,7 +85,7 @@ const Home: React.FC = () => {
   };
 
   return (
-    <View className="flex-1 ">
+    <View className="flex-1">
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
