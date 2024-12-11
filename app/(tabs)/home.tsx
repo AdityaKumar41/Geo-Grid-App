@@ -11,7 +11,7 @@ import MapView, { Marker } from "react-native-maps";
 import { Header } from "../../components/Header";
 import { DateSelector } from "../../components/DataSelector";
 import { AttendanceSection } from "../../components/AttendanceSection";
-import { TaskSection } from "../../components/TaskSection";
+import { AttendanceHistory } from "../../components/TaskSection";
 import { useLocation } from "../../hooks/useLocations";
 
 // Add default location
@@ -81,8 +81,7 @@ const Home: React.FC = () => {
           <AttendanceSection />
 
           <View className="space-y-4 p-4">
-            <TaskSection />
-            <TaskSection />
+            <AttendanceHistory />
           </View>
         </ScrollView>
       </View>
