@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Attendance-System",
-    "slug": "Attendance-System",
+    "slug": "geo8tendance",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -20,7 +20,11 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -38,6 +42,15 @@
       "react-native-background-geolocation",
       "react-native-background-fetch",
       "expo-gradle-ext-vars"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "cc26c4cc-049c-4421-8adc-e6d470af12bf"
+      }
+    },
+    "owner": "0xdeepesh"
   }
 }

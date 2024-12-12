@@ -32,7 +32,10 @@ const DayAttendance: React.FC<DayAttendanceProps> = ({ day, date, status }) => {
     </View>
   );
 };
-export const AttendanceHistory: React.FC = () => {
+interface AttendanceHistoryProps {
+  pairs?: AttendancePair[];
+}
+export const AttendanceHistory: React.FC<AttendanceHistoryProps> = ({ pairs = [] }) => {
   const attendanceData: DayAttendanceProps[] = [
     { day: "Mon", date: "24", status: "present" },
     { day: "Tue", date: "25", status: "present" },
