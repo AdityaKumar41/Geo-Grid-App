@@ -1,6 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import * as Location from "expo-location";
 
+const TARGET_LOCATION = {
+  latitude: 34.122891,
+  longitude: 74.841080,
+  radius: 200 // meters
+};
+
 export interface LocationObject {
   latitude: number;
   longitude: number;
@@ -32,6 +38,9 @@ export const useLocation = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const subscriptionRef = useRef<Location.LocationSubscription | null>(null);
+  const [distance, setDistance] = useState<number>(0);
+  const [previousDistance, setPreviousDistance] = useState<number>(0);
+  const GEOFENCE_RADIUS = 200; // meters
 
   const initializeLocation = async () => {
     try {
@@ -69,7 +78,7 @@ export const useLocation = () => {
       subscriptionRef.current = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.BestForNavigation,
-          timeInterval: 10000, // Update every second
+          timeInterval: 100000, // Update every second
           distanceInterval: 0.1, // Update every 0.1 meters
           mayShowUserSettingsDialog: true // Prompt user to enable high accuracy
         },
@@ -91,14 +100,11 @@ export const useLocation = () => {
             
             setLocation(newLocation);
 
-            const targetLat = 34.122891;
-            const targetLng = 74.841080;
-            
             const distanceInMeters = Math.round(calculateDistance(
               newLocation.latitude,
               newLocation.longitude,
-              targetLat,
-              targetLng
+              TARGET_LOCATION.latitude,
+              TARGET_LOCATION.longitude
             ) * 1000); // Convert km to meters
             
             console.log('Location Update:', {
@@ -108,17 +114,20 @@ export const useLocation = () => {
                 accuracy: newLocation.accuracy
               },
               targetLocation: {
-                lat: targetLat.toFixed(6),
-                lng: targetLng.toFixed(6)
+                lat: TARGET_LOCATION.latitude.toFixed(6),
+                lng: TARGET_LOCATION.longitude.toFixed(6)
               },
               distance: `${distanceInMeters} meters`
             });
 
-            if (distanceInMeters <= 200) {
+            if (distanceInMeters <= 500) {
               console.log(`Inside target zone - Distance: ${distanceInMeters} meters`);
             } else {
               console.log(`Outside target zone - Distance: ${distanceInMeters} meters`);
             }
+
+            setPreviousDistance(distance);
+            setDistance(distanceInMeters);
           }
         }
       );
@@ -144,5 +153,14 @@ export const useLocation = () => {
     };
   }, []);
 
-  return { location, loading, error, initializeLocation, calculateDistance };
+  return { 
+    location, 
+    loading, 
+    error, 
+    initializeLocation, 
+    calculateDistance,
+    distance,
+    previousDistance,
+    isWithinGeofence: distance <= GEOFENCE_RADIUS 
+  };
 };

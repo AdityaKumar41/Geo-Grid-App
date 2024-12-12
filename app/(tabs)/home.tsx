@@ -20,6 +20,7 @@ import { useLocation, calculateDistance } from "../../hooks/useLocations";
 import Geocoding from 'react-native-geocoding';
 import { nanoid } from 'nanoid/non-secure';
 import 'react-native-get-random-values';
+import { useAttendancePairs } from '../../hooks/useAttendancePair';
 
 // Update the region state type
 interface RegionType {
@@ -64,6 +65,13 @@ const Home: React.FC = () => {
     longitude: number;
     address?: string;
   } | null>(null);
+  const { 
+    isInside, 
+    currentPair, 
+    todayPairs, 
+    totalDuration,
+    status 
+  } = useAttendancePairs();
 
   useEffect(() => {
     if (location && activeTab === 'onsite') {
@@ -241,7 +249,6 @@ const Home: React.FC = () => {
     
     setIsSearching(true);
     try {
-      // Add user-agent header to comply with OSM requirements
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
           query
@@ -254,14 +261,9 @@ const Home: React.FC = () => {
         }
       );
       
-      if (!response.ok) {
-        throw new Error('Search failed');
-      }
+      if (!response.ok) throw new Error('Search failed');
 
       const data = await response.json();
-      console.log('Search results:', data);
-      
-      // Transform the data to a more usable format
       const formattedResults = data.map((item: any) => ({
         id: item.place_id,
         name: item.display_name,
@@ -398,56 +400,69 @@ const Home: React.FC = () => {
   };
 
   // Update the SearchBar component
-  const SearchBar = () => (
-    <View className="mb-4 z-50">
-      <TextInput
-        className="h-12 px-4 bg-white rounded-lg shadow-sm"
-        placeholder="Search location to center the map"
-        value={searchQuery}
-        onChangeText={(text) => {
-          setSearchQuery(text);
-          if (debounceTimeout.current) {
-            clearTimeout(debounceTimeout.current);
-          }
-          
-          if (text.length >= 3) {
-            debounceTimeout.current = setTimeout(() => {
-              searchLocation(text);
-            }, 800);
-          } else {
-            setSearchResults([]);
-          }
-        }}
-        returnKeyType="search"
-      />
-      
-      {isSearching && (
-        <ActivityIndicator className="mt-2" size="small" color="#4B5563" />
-      )}
+  const SearchBar = () => {
+    const [showResults, setShowResults] = useState(true);
 
-      {searchResults.length > 0 && (
-        <View className="absolute top-12 left-0 right-0 bg-white rounded-lg shadow-lg z-50">
-          {searchResults.map((item: any) => (
-            <TouchableOpacity
-              key={item.id}
-              className="p-4 border-b border-gray-200"
-              onPress={() => {
-                handleLocationSelect({
-                  lat: item.latitude,
-                  lon: item.longitude,
-                  display_name: item.name
-                });
-                Keyboard.dismiss();
-              }}
-            >
-              <Text className="text-gray-800 font-medium">{item.name}</Text>
-              <Text className="text-gray-500 text-sm mt-1">{item.type}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
-    </View>
-  );
+    const handleTextChange = (text: string) => {
+      setSearchQuery(text);
+      
+      // Clear any existing timeout
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+      
+      // Only search if text length is 3 or more
+      if (text.length >= 3) {
+        // Reduced timeout from 5000ms to 800ms for better responsiveness
+        debounceTimeout.current = setTimeout(() => {
+          searchLocation(text);
+        }, 800); // Changed from 5000 to 800
+      } else {
+        setSearchResults([]);
+      }
+    };
+
+    return (
+      <View className="mb-4 z-50">
+        <TextInput
+          className="h-12 px-4 bg-white rounded-lg shadow-sm"
+          placeholder="Search location to center the map"
+          value={searchQuery}
+          onChangeText={handleTextChange}
+          onFocus={() => setShowResults(true)}
+          autoCorrect={false}
+          autoCapitalize="none"
+        />
+        
+        {isSearching && (
+          <ActivityIndicator className="mt-2" size="small" color="#4B5563" />
+        )}
+
+        {showResults && searchResults.length > 0 && (
+          <View className="absolute top-12 left-0 right-0 bg-white rounded-lg shadow-lg z-50">
+            {searchResults.map((item: any) => (
+              <TouchableOpacity
+                key={item.id}
+                className="p-4 border-b border-gray-200"
+                onPress={() => {
+                  handleLocationSelect({
+                    lat: item.latitude,
+                    lon: item.longitude,
+                    display_name: item.name
+                  });
+                  setShowResults(false);
+                  // Keyboard.dismiss();
+                }}
+              >
+                <Text className="text-gray-800 font-medium">{item.name}</Text>
+                <Text className="text-gray-500 text-sm mt-1">{item.type}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </View>
+    );
+  };
 
   // Update the map view in renderContent
   const renderContent = () => {
@@ -477,24 +492,33 @@ const Home: React.FC = () => {
                 {renderMap()}
               </View>
               <DateSelector />
-              <AttendanceSection />
+              <AttendanceSection 
+                isWithinRange={isInside}
+                currentPair={currentPair}
+                todayPairs={todayPairs}
+                totalDuration={totalDuration}
+                status={status}
+              />
               <View className="space-y-4 p-4">
-                <AttendanceHistory />
+                <AttendanceHistory pairs={todayPairs} />
               </View>
             </>
           ) : (
             <View className="p-4">
               <SearchBar />
-              <View
-                className="h-[300px] rounded-md overflow-hidden mb-4"
-                style={{ elevation: 5 }}
-              >
+              <View className="h-[300px] rounded-md overflow-hidden mb-4" style={{ elevation: 5 }}>
                 {renderMap()}
               </View>
               <DateSelector />
-              <AttendanceSection />
+              <AttendanceSection 
+                isWithinRange={isInside}
+                currentPair={currentPair}
+                todayPairs={todayPairs}
+                totalDuration={totalDuration}
+                status={status}
+              />
               <View className="space-y-4 mt-4">
-                <AttendanceHistory />
+                <AttendanceHistory pairs={todayPairs} />
               </View>
 
               <TouchableOpacity
